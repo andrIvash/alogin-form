@@ -65,7 +65,11 @@ export class AppComponent {
     }
     public submit(ev: Event, value: {[key: string]: string}) {
         let form = ev.target as HTMLFormElement;
-        console.log(value);
-        form.reset();
+        if (form.classList.contains('ng-invalid')) {
+            alert('wrong data');
+        } else {
+            console.log(value);
+            form.reset();
+        }
     }
 }
