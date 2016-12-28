@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {FormControl, FormGroup, FormBuilder, Validators} from '@angular/forms';
 
 @Component({
     selector: 'app-root',
@@ -6,8 +7,22 @@ import {Component} from '@angular/core';
     styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-    public title = 'app works!';
+    public title = '';
+    public signUpForm: FormGroup;
+    public loginForm: FormGroup;
 
+    public constructor(private _formBuilder: FormBuilder) {
+        this.signUpForm = new FormGroup({
+            fname: new FormControl('', Validators.compose([Validators.required, Validators.minLength(3)])),
+            lname: new FormControl('', Validators.compose([Validators.required, Validators.minLength(3)])),
+            email: new FormControl('', this.emailValidation),
+            password: new FormControl('', Validators.compose([Validators.required, Validators.minLength(3)]))
+        });
+        this.loginForm = this._formBuilder.group({
+            email: ['', this.emailValidation],
+            password: ['', Validators.compose([Validators.required, Validators.maxLength(8), Validators.minLength(3)])]
+        });
+    }
     public changeTab(ev: Event) {
         let link = ev.target as HTMLElement,
             sibling = link.parentElement.nextElementSibling || link.parentElement.previousElementSibling as HTMLElement,
@@ -43,5 +58,14 @@ export class AppComponent {
             }
         }
     }
-    public constructor() {}
+    public emailValidation(control: FormControl): {[key: string]: boolean} {
+        const value = control.value || '';
+        const valid = value.match(/@/);
+        return valid ? null : {email: true};
+    }
+    public submit(ev: Event, value: {[key: string]: string}) {
+        let form = ev.target as HTMLFormElement;
+        console.log(value);
+        form.reset();
+    }
 }

@@ -123,7 +123,10 @@ input:focus, textarea:focus {
     outline: 0;
     border-color: #1ab188;
 }
-
+input.ng-invalid.ng-touched {
+    border-color: #b13234;
+    color: #b13234
+}
 textarea {
     border: 2px solid #a0b3b0;
     resize: vertical;
