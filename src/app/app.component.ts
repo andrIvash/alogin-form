@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {FormControl, FormGroup, FormBuilder, Validators} from '@angular/forms';
+import {ValidationService} from './shared/validation.service';
 
 @Component({
     selector: 'app-root',
@@ -11,15 +12,15 @@ export class AppComponent {
     public signUpForm: FormGroup;
     public loginForm: FormGroup;
 
-    public constructor(private _formBuilder: FormBuilder) {
+    public constructor(private _formBuilder: FormBuilder, private _validationService: ValidationService) {
         this.signUpForm = new FormGroup({
             fname: new FormControl('', Validators.compose([Validators.required, Validators.minLength(3)])),
             lname: new FormControl('', Validators.compose([Validators.required, Validators.minLength(3)])),
-            email: new FormControl('', this.emailValidation),
+            email: new FormControl('', _validationService.emailValidation),
             password: new FormControl('', Validators.compose([Validators.required, Validators.minLength(3)]))
         });
         this.loginForm = this._formBuilder.group({
-            email: ['', this.emailValidation],
+            email: ['', _validationService.emailValidation],
             password: ['', Validators.compose([Validators.required, Validators.maxLength(8), Validators.minLength(3)])]
         });
     }
@@ -58,11 +59,7 @@ export class AppComponent {
             }
         }
     }
-    public emailValidation(control: FormControl): {[key: string]: boolean} {
-        const value = control.value || '';
-        const valid = value.match(/@/);
-        return valid ? null : {email: true};
-    }
+
     public submit(ev: Event, value: {[key: string]: string}) {
         let form = ev.target as HTMLFormElement;
         if (form.classList.contains('ng-invalid')) {
