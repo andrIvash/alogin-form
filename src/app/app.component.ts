@@ -1,17 +1,25 @@
-import {Component} from '@angular/core';
+import {Component, ViewChild, ElementRef, OnInit} from '@angular/core';
 import {FormControl, FormGroup, FormBuilder, Validators} from '@angular/forms';
 import {ValidationService} from './shared/validation.service';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/filter';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
     public title = '';
     public signUpForm: FormGroup;
     public loginForm: FormGroup;
 
+    @ViewChild('tabGroup')
+    public tabGroup: ElementRef;
+    private tab: Observable<Event>;
+    private currentTabState: string = '#signup';
     public constructor(private _formBuilder: FormBuilder, private _validationService: ValidationService) {
         this.signUpForm = new FormGroup({
             fname: new FormControl('', Validators.compose([Validators.required, Validators.minLength(3)])),
@@ -24,42 +32,13 @@ export class AppComponent {
             password: ['', Validators.compose([Validators.required, Validators.maxLength(8), Validators.minLength(3)])]
         });
     }
-    public changeTab(ev: Event) {
-        let link = ev.target as HTMLElement,
-            sibling = link.parentElement.nextElementSibling || link.parentElement.previousElementSibling as HTMLElement,
-            queryAttr: string = link.getAttribute('href'),
-            tab = document.querySelector(`.tab-content > div:not(${queryAttr})`) as HTMLElement,
-            formWrapper = document.querySelector(`${queryAttr}`) as HTMLElement;
-        link.parentElement.classList.add('active');
-        sibling.classList.remove('active');
-        tab.style.display = 'none';
-        formWrapper.style.display = 'block';
-    };
-    public inputData(e: Event) {
-        let currentInput  = e.target as HTMLInputElement,
-            label = currentInput.previousElementSibling as HTMLElement;
-
-        if (e.type === 'keyup') {
-            if (currentInput.value === '') {
-                label.classList.remove('active', 'highlight');
-            } else {
-                label.classList.add('active', 'highlight');
-            }
-        } else if (e.type === 'blur') {
-            if (currentInput.value === '' ) {
-                label.classList.remove('active', 'highlight');
-            } else {
-                label.classList.remove('highlight');
-            }
-        } else if (e.type === 'focus') {
-            if (currentInput.value === '' ) {
-                label.classList.remove('highlight');
-            } else if (currentInput.value !== '' ) {
-                label.classList.remove('highlight');
-            }
-        }
+    public ngOnInit() {
+        this.tab = Observable.fromEvent<Event>(this.tabGroup.nativeElement, 'click');
+        this.tab.subscribe((event: Event) => {
+            this.currentTabState = (event.target as HTMLAnchorElement).hash;
+            console.log(this.currentTabState);
+        });
     }
-
     public submit(ev: Event, value: {[key: string]: string}) {
         let form = ev.target as HTMLFormElement;
         if (form.classList.contains('ng-invalid')) {
@@ -69,4 +48,6 @@ export class AppComponent {
             form.reset();
         }
     }
+
+
 }
